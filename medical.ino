@@ -8,6 +8,14 @@
 // Setting LCD screen 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
+// LED lights setting
+const int redPin = 7;
+const int yellowPin = 8;
+const int greenPin = 13;
+
+// PIR motion sensor 
+const int motionPin = 6;
+
 // Ultrasonic sensor 
 const int SENSOR_IN  = 3;
 const int SENSOR_OUT = 2;
@@ -42,8 +50,8 @@ char keys[ROWS][COLS] = {
 };
 
 // Keypad pin connections 
-byte pinRow[ROWS] = {31, 33, 35, 37}; // Rows
-byte pinCol[COLS] = {39, 41, 43, 45}; // Columns 
+byte pinRow[ROWS] = {45, 43, 41, 39}; // Rows
+byte pinCol[COLS] = {37, 35, 33, 31}; // Columns 
 
 // Configuring keypad map
 Keypad keypad = Keypad(makeKeymap(keys), pinRow, pinCol, ROWS, COLS);
@@ -106,6 +114,12 @@ void setup() {
   delay(2000);
   lcd.clear(); // Clearing screen after 2 seconds 
 
+  pinMode(redPin, OUTPUT);
+  pinMode(yellowPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+
+  pinMode(motionPin, INPUT);
+
   motor1.setSpeed(motorSpeed);
   motor2.setSpeed(motorSpeed);
   motor3.setSpeed(motorSpeed);
@@ -165,56 +179,20 @@ void loop() {
     
 
       if (item == "12A") {
-        lcd.print("dispensing...");
-        motor1.step(2048);
-        delay(1000);
-        motor1.step(-2048);
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Done!");
-        delay(2000);
-        lcd.clear();
+        dispenseItem(motor1); 
 
-        resetPins();
       }
       else if (item == "13B") {
-        lcd.print("dispensing...");
-        motor2.step(2048);
-        delay(1000);
-        motor2.step(-2048);
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Done!");
-        delay(2000);
-        lcd.clear();
+        dispenseItem(motor2); 
 
-        resetPins();
       }
       else if (item == "12B") {
-        lcd.print("dispensing...");
-        motor3.step(2048);
-        delay(1000);
-        motor3.step(-2048);
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Done!");
-        delay(2000);
-        lcd.clear();
+        dispenseItem(motor3); 
 
-        resetPins();
       }
       else if (item == "13A") {
-        lcd.print("dispensing...");
-        motor4.step(2048);
-        delay(1000);
-        motor4.step(-2048);
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Done!");
-        delay(2000);
-        lcd.clear();
+       dispenseItem(motor4); 
 
-        resetPins();
       }
       else {
         lcd.setCursor(0, 0);
@@ -247,8 +225,6 @@ void loop() {
     rfid.PICC_HaltA();
     rfid.PCD_StopCrypto1();
     }
-
-    
     
 
 
@@ -304,4 +280,42 @@ String passCheck() {
     }
 
     return input;
+}
+
+void dispenseItem(Stepper &motor) {
+  lcd.print("dispensing...");
+  motor.step(2048);
+  lcd.clear();
+  ledDispense();
+  lcd.setCursor(0, 0);
+  lcd.print("Done!");
+  delay(2000);
+  lcd.clear();
+
+  resetPins();
+}
+
+void ledDispense() {
+
+  lcd.setCursor(0, 0);
+  lcd.print("Please collect");
+  lcd.setCursor(0, 1);
+  lcd.print("item :)");
+
+  // Red
+  digitalWrite(redPin, HIGH);
+  delay(500);
+  digitalWrite(redPin, LOW);
+
+  // Yellow
+  digitalWrite(yellowPin, HIGH);
+  delay(500);
+  digitalWrite(yellowPin, LOW);
+
+  // Green 
+  digitalWrite(greenPin, HIGH);
+  delay(500);
+  digitalWrite(greenPin, LOW);
+
+  lcd.clear();
 }
